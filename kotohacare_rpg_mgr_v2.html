@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>訪問ケア・クエスト｜ことはさん（新人サ責）編【まほろば表情対応】</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#ffffff;--ink:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#16a34a;--bad:#dc2626;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Arial,"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:18px}
+  h1{margin:8px 0 0 0;font-size:22px}
+  .sub{color:var(--muted);margin:4px 0 16px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .card{background:var(--card);border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.08);padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:8px;border:1px solid #e5e7eb}
+  .card:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,0,0,.12)}
+  .tag{display:inline-block;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:999px;padding:2px 8px;font-size:12px;margin-right:4px}
+  .play{margin-top:auto;align-self:flex-end;background:#111827;color:#fff;border:0;border-radius:10px;padding:8px 12px;font-weight:700}
+  .stage{background:var(--card);border-radius:16px;box-shadow:0 10px 28px rgba(0,0,0,.10);overflow:hidden;display:none;margin-top:6px}
+  .scene{padding:14px;border-bottom:1px solid #eee}
+  .row{display:flex;gap:10px;align-items:flex-start}
+  .char{flex:1;background:#f3f4f6;border-radius:12px;padding:10px}
+  .char h3{margin:0 0 6px 0;font-size:15px}
+  .char .face{font-size:26px;line-height:1.2}
+  .bubble{background:#eef2ff;border-left:4px solid var(--accent);padding:10px;border-radius:8px}
+  .bubble p{margin:0;font-size:15px}
+  .system{padding:10px 14px;background:#ecfeff;border-left:4px solid #06b6d4}
+  .choices{display:grid;grid-template-columns:1fr;gap:8px;padding:12px}
+  .choices button{appearance:none;border:0;border-radius:10px;padding:11px 12px;font-size:15px;font-weight:700;background:#111827;color:#fff;cursor:pointer}
+  .choices button.secondary{background:#334155}
+  .choices button.warn{background:#b91c1c}
+  .choices button:hover{filter:brightness(1.05)}
+  .result{padding:12px;display:none}
+  .result.good{background:#ecfdf5;border-left:4px solid var(--good)}
+  .result.bad{background:#fef2f2;border-left:4px solid var(--bad)}
+  .footer{display:flex;gap:8px;justify-content:flex-end;padding:12px;border-top:1px solid #eee}
+  .footer button{appearance:none;border:0;background:#2563eb;color:#fff;padding:10px 12px;border-radius:10px;font-weight:700}
+  .footer button.alt{background:#475569}
+  .meter{margin-top:8px;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .meter>div{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .5s}
+  .badge{display:inline-block;background:#111827;color:#fff;border-radius:999px;padding:4px 10px;font-size:12px;margin-left:8px}
+  .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .back{appearance:none;border:0;background:#111827;color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
+  .muted{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>訪問ケア・クエスト｜ことはさん（新人サ責）編</h1>
+      <p class="sub">主人公：<strong>ことはさん（新人サービス提供責任者）</strong>｜セーブ不要・スマホOK｜現場×管理の判断力を鍛える</p>
+    </div>
+    <button class="back" id="toMenu" style="display:none" onclick="toMenu()">章一覧へ</button>
+  </div>
+
+  <div id="menu"><div class="grid" id="cards"></div></div>
+
+  <div class="stage" id="game">
+    <div class="scene">
+      <div class="row">
+        <div class="char"><h3>ことはさん（新人サ責）</h3><div class="face" id="kFace">🙂</div><div class="muted">※緊張しつつも前向き</div></div>
+        <div class="char"><h3>まほろばさん（ベテランヘルパー）</h3><div class="face" id="mFace">🧓</div><div class="muted">※反応が変わります</div></div>
+        <div class="char"><h3>奈良男くん（家族・キーパーソン）</h3><div class="face" id="oFace">🕴️</div><div class="muted">※場面により登場</div></div>
+      </div>
+    </div>
+
+    <div class="system"><span id="chapterTitle"></span> <span class="badge" id="badge">設問1/2</span></div>
+    <div class="scene"><div class="bubble" id="dialogue"></div></div>
+    <div class="choices" id="choices"></div>
+    <div class="result" id="resultBox"></div>
+
+    <div class="scene" id="summaryBox" style="display:none">
+      <h3>章のまとめ</h3>
+      <p id="summaryText"></p>
+      <div class="meter"><div id="meterBar"></div></div>
+    </div>
+
+    <div class="footer">
+      <button class="alt" onclick="restart()">この章をやり直す</button>
+      <button id="nextBtn" onclick="next()">次へ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  { id:'S1', title:'第1章：初めての訪問介護計画書', q:[
+    { text:'新規利用者・吉田さん。初回アセスメント後、ことはさんは計画書作成へ。最初の一歩は？',
+      opts:[ ['本人の目標を聞き取り、ニーズを整理',+15,'good','本人主体の目標設定が核。'],
+             ['過去の様式をコピペ',-10,'bad','個別性が欠落。'],
+             ['ヘルパーの希望を最優先',-5,'neutral','チーム都合偏重はNG。'] ]},
+    { text:'計画書の説明。どの順番が良い？',
+      opts:[ ['目的→内容→頻度→同意→見直し時期',+15,'good','理解と合意形成が進む。'],
+             ['専門用語で一気に説明',-10,'bad','伝わらない。'],
+             ['署名だけお願い',-20,'bad','不適切。'] ]}
+  ]},
+  { id:'S2', title:'第2章：担当者会議の準備', q:[
+    { text:'会議前に揃えるべき情報は？',
+      opts:[ ['アセスメント要点・目標・課題・役割分担案',+15,'good','議論が整理される。'],
+             ['雑談メモ',-5,'neutral','目的からズレる。'],
+             ['資料は当日集める',-15,'bad','非効率。'] ]},
+    { text:'当日の進行で大切なのは？',
+      opts:[ ['時間配分と発言の可視化（議事）',+15,'good','合意形成の土台。'],
+             ['声の大きい人を優先',-10,'bad','偏る。'],
+             ['沈黙を放置',-10,'bad','意見が出ない。'] ]}
+  ]},
+  { id:'S3', title:'第3章：初動クレーム対応', q:[
+    { text:'利用者から「掃除が雑」と電話。初動は？',
+      opts:[ ['傾聴→具体確認→一次謝罪→是正案',+20,'good','基本の型。'],
+             ['すぐ言い訳',-15,'bad','火に油。'],
+             ['担当者を責める',-10,'bad','チーム崩壊。'] ]},
+    { text:'事実確認後の内部対応は？',
+      opts:[ ['面談→指導→共有',+15,'good','再発防止。'],
+             ['犯人探しのみ',-10,'bad','萎縮。'],
+             ['放置',-20,'bad','信頼低下。'] ]}
+  ]},
+  { id:'S4', title:'第4章：モニタリング訪問', q:[
+    { text:'訪問時、観察・質問の軸は？',
+      opts:[ ['ADL/IADL・疼痛・食事・睡眠・気分',+15,'good','変化に気づける。'],
+             ['雑談中心',-5,'neutral','和むが情報不足。'],
+             ['記録は後で想像',-20,'bad','誤記の元。'] ]},
+    { text:'小さな変化を発見。対応は？',
+      opts:[ ['記録→共有→必要なら見直し',+15,'good','PDCAを回す。'],
+             ['次回に回す',-10,'bad','遅れる。'],
+             ['様子見で放置',-15,'bad','取り逃し。'] ]}
+  ]},
+  { id:'S5', title:'第5章：記録点検とフィードバック', q:[
+    { text:'記録点検で誤記発見。指導のコツは？',
+      opts:[ ['事実ベースで是正＋良い点も伝える',+15,'good','学びを促す。'],
+             ['人格を否定',-15,'bad','関係悪化。'],
+             ['全部自分で書き直す',-10,'bad','育たない。'] ]},
+    { text:'共有の範囲は？',
+      opts:[ ['必要最小限・守秘を徹底',+10,'good','信頼の根幹。'],
+             ['グループLINEに詳細晒し',-20,'bad','情報漏えい。'],
+             ['口頭で噂話',-10,'bad','混乱。'] ]}
+  ]},
+  { id:'S6', title:'第6章：シフト調整と欠員対応', q:[
+    { text:'急な欠員。最初の判断は？',
+      opts:[ ['優先度→代替案→連絡',+15,'good','混乱を最小化。'],
+             ['新人を無理に投入',-10,'bad','事故の元。'],
+             ['放置',-20,'bad','サービス停止。'] ]},
+    { text:'連続残業の要請。配慮は？',
+      opts:[ ['労務管理と健康配慮、分散配置',+15,'good','持続可能性。'],
+             ['無制限にお願い',-15,'bad','離職リスク。'],
+             ['当日中にお願いだけ',-10,'bad','準備不足。'] ]}
+  ]},
+  { id:'S7', title:'第7章：介護保険外依頼の線引き', q:[
+    { text:'家族から「通帳管理もお願い」。対応は？',
+      opts:[ ['制度上不可を説明＋代替案',+20,'good','線引きと代案。'],
+             ['少額だからOK',-20,'bad','コンプラ違反。'],
+             ['曖昧に笑って流す',-10,'bad','火種に。'] ]},
+    { text:'草むしり・洗車を求められたら？',
+      opts:[ ['保険外→自費サービス案内',+15,'good','誤解防止。'],
+             ['その場で対応',-15,'bad','不正請求。'],
+             ['断るだけ',-5,'neutral','説明不足。'] ]}
+  ]},
+  { id:'S8', title:'第8章：多職種連携（ケアマネ・看護）', q:[
+    { text:'どの情報を共有？',
+      opts:[ ['事実・変化・提案を簡潔に',+15,'good','相手が動ける情報。'],
+             ['主観と感想中心',-10,'bad','判断不能。'],
+             ['大量の未整理情報',-5,'neutral','伝わりにくい。'] ]},
+    { text:'連携が滞るときの工夫は？',
+      opts:[ ['窓口一本化・締切・テンプレ活用',+15,'good','仕組みで回す。'],
+             ['運に任せる',-10,'bad','再発。'],
+             ['誰かのせいにする',-15,'bad','関係悪化。'] ]}
+  ]},
+  { id:'S9', title:'第9章：事故・ヒヤリの初動', q:[
+    { text:'転倒ヒヤリの報告を受けた。初動は？',
+      opts:[ ['状態確認→医療→家族→記録→是正',+20,'good','命と再発防止。'],
+             ['上司に丸投げ',-10,'bad','責任不明確。'],
+             ['記録を後回し',-10,'bad','証跡欠落。'] ]},
+    { text:'社内共有のポイントは？',
+      opts:[ ['匿名化と学びに集中',+15,'good','責めない文化。'],
+             ['個人名をさらす',-15,'bad','萎縮。'],
+             ['共有しない',-20,'bad','再発。'] ]}
+  ]},
+  { id:'S10', title:'第10章：面談とOJT（まほろばさんと）', q:[
+    { text:'気になる支援があった新人へ。面談の切り出しは？',
+      opts:[ ['事実→影響→期待→支援の順で',+15,'good','安心して改善へ。'],
+             ['感情的に叱責',-15,'bad','萎縮。'],
+             ['放置',-10,'bad','改善せず。'] ]},
+    { text:'OJTの設計は？',
+      opts:[ ['目標・観察項目・振り返り時間を設定',+15,'good','学びが定着。'],
+             ['現場任せ',-10,'bad','属人化。'],
+             ['チェックだけ厳しく',-5,'neutral','怖さだけ残る。'] ]}
+  ]},
+];
+
+// ====== 状態 ======
+let trust = 0, qIndex = 0, currentChapter = null;
+
+// ====== 要素 ======
+const menu = document.getElementById('menu');
+const cards = document.getElementById('cards');
+const game = document.getElementById('game');
+const badge = document.getElementById('badge');
+const chapTitle = document.getElementById('chapterTitle');
+const dialogue = document.getElementById('dialogue');
+const choices = document.getElementById('choices');
+const resultBox = document.getElementById('resultBox');
+const kFace = document.getElementById('kFace');
+const mFace = document.getElementById('mFace');
+const oFace = document.getElementById('oFace');
+const nextBtn = document.getElementById('nextBtn');
+const toMenuBtn = document.getElementById('toMenu');
+const summaryBox = document.getElementById('summaryBox');
+const summaryText = document.getElementById('summaryText');
+const meterBar = document.getElementById('meterBar');
+
+// ====== メニュー ======
+function buildMenu(){
+  cards.innerHTML = '';
+  chapters.forEach((ch)=>{
+    const c = document.createElement('div');
+    c.className = 'card';
+    const tags = document.createElement('div');
+    const t2 = document.createElement('span'); t2.className='tag'; t2.textContent = '新人サ責';
+    tags.appendChild(t2);
+    const h = document.createElement('div'); h.innerHTML = `<strong>${ch.title}</strong>`;
+    const s = document.createElement('div'); s.className='muted'; s.textContent = `設問 ${ch.q.length} 問／クリックで開始`;
+    const b = document.createElement('button'); b.className='play'; b.textContent='この章で遊ぶ'; b.onclick = ()=>startChapter(ch);
+    c.appendChild(tags); c.appendChild(h); c.appendChild(s); c.appendChild(b);
+    cards.appendChild(c);
+  });
+}
+buildMenu();
+
+// ====== 章開始 ======
+function startChapter(ch){
+  currentChapter = ch;
+  trust = 0; qIndex = 0;
+  kFace.textContent = '🙂'; mFace.textContent='🧓'; oFace.textContent='🕴️';
+  chapTitle.textContent = ch.title;
+  menu.style.display='none'; game.style.display='block'; toMenuBtn.style.display='inline-block';
+  summaryBox.style.display='none'; resultBox.style.display='none'; nextBtn.style.display='none';
+  renderQuestion();
+}
+
+// ====== 設問描画 ======
+function renderQuestion(){
+  const q = currentChapter.q[qIndex];
+  badge.textContent = `設問${qIndex+1}/${currentChapter.q.length}`;
+  dialogue.innerHTML = q.text;
+  choices.innerHTML = '';
+  resultBox.style.display='none';
+  q.opts.forEach((op,i)=>{
+    const b = document.createElement('button');
+    b.textContent = (i===0?'1️⃣ ':'')+(i===1?'2️⃣ ':'')+(i===2?'3️⃣ ':'') + op[0];
+    if(i===1) b.classList.add('secondary');
+    if(i===2) b.classList.add('warn');
+    b.onclick = ()=>{
+      trust += op[1];
+      const kind = op[2], msg=op[3];
+      // 顔の変化：まほろばさん → good: 😊 / neutral: 😱 / bad: 😠
+      if(kind==='good'){ mFace.textContent='😊'; resultBox.className='result good'; oFace.textContent='🕴️'; }
+      else if(kind==='bad'){ mFace.textContent='😠'; resultBox.className='result bad'; oFace.textContent='😡'; }
+      else { mFace.textContent='😱'; resultBox.className='result'; oFace.textContent='🕴️'; }
+      resultBox.innerHTML = `<strong>結果：</strong>${msg}（信頼 ${trust>=0?'+':''}${op[1]}）`;
+      resultBox.style.display='block';
+      Array.from(choices.querySelectorAll('button')).forEach(x=>x.disabled=true);
+      nextBtn.style.display='inline-block';
+    };
+    choices.appendChild(b);
+  });
+}
+
+// ====== 次へ／終了 ======
+function next(){
+  qIndex++;
+  if(qIndex >= currentChapter.q.length){ finishChapter(); }
+  else { resultBox.style.display='none'; nextBtn.style.display='none'; renderQuestion(); }
+}
+
+function finishChapter(){
+  const max = currentChapter.q.length*20;
+  const pct = Math.max(0, Math.min(100, (trust/max)*100));
+  const grade = pct>=80?'S（とても良い）':pct>=60?'A（良い）':pct>=40?'B（ふつう）':'C（見直し）';
+  summaryText.innerHTML = `最終評価：<strong>${grade}</strong><br/>獲得スコア：信頼 ${trust} / ${max}<br/>学び：<ul><li>本人・家族・現場の合意形成</li><li>事実ベースの記録と連携</li><li>制度の線引きと代替提案</li></ul>`;
+  meterBar.style.width = pct + '%';
+  summaryBox.style.display='block';
+  nextBtn.style.display='none';
+  choices.innerHTML='';
+}
+
+function restart(){
+  trust = 0; qIndex = 0;
+  kFace.textContent = '🙂'; mFace.textContent='🧓'; oFace.textContent='🕴️';
+  summaryBox.style.display='none'; resultBox.style.display='none'; nextBtn.style.display='none';
+  renderQuestion();
+}
+
+function toMenu(){
+  game.style.display='none'; menu.style.display='block'; toMenuBtn.style.display='none';
+}
+</script>
+</body>
+</html>
